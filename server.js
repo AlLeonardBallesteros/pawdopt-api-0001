@@ -9,14 +9,8 @@ const cookieParser = require("cookie-parser");
 // const userController = require('./controller/user');
 const galleryController = require('./controller/galleryController');
 const usergalleryController = require('./controller/usergalleryController');
-const volunteerController = require('./controller/volunteerController');
-const handleFormSubmission  = require('./controller/formController');
 const requireAuth = require('./middleware/requireAuth');
-
-
-
 const authController = require('./controller/authController');
-
 const app = express();
 
 
@@ -42,40 +36,44 @@ app.get("/", (req, res) => {
 //auth
 app.post('/api/register', authController.register);
 app.post('/api/login' , authController.login);
+app.get('/api/check-verification/:id', authController.checkVerification);
+app.post('/api/forgotpassword', authController.forgotPassword);
+app.post('/api/newpassword', authController.newPassword);
+//auth parin admin get, edit, delete user
+app.get('/api/getallusers', authController.getAllUsers);
+app.patch('/api/edit/user/:id', authController.editUser);
+app.delete('/api/delete/user/:id', authController.deleteUser)
+app.put('/api/toggle-verification/:id', authController.toggleUserVerification);
 
-
-//sign in, sign up, reset password for user
-// app.post('/signup', userController.signup);
-// app.post('/signin', userController.signin);
-// app.post('/submit-otp', userController.submitotp);
-// app.post('/send-otp', userController.sendotp);
 
 //admin upload image crud
 app.post('/api/upload',requireAuth , galleryController.upload.single('image'), galleryController.handleUpload);
 app.get('/api/gallery', galleryController.getGallery);
 app.put('/api/gallery/:id',requireAuth, galleryController.editImage);
-app.delete('/api/gallery/:id',requireAuth, galleryController.deleteImage);
+// app.delete('/api/gallery/:id',requireAuth, galleryController.deleteImage);
+
+
+//admin image approval to user's upload 
+app.get('/api/pending-images', usergalleryController.getPendingImages);
+app.put('/api/approve-image/:id', usergalleryController.approveImage);
+app.delete('/api/decline-image/:id', usergalleryController.declineImage);
+
+app.get('/api/user/gallery/adopt', usergalleryController.usergetGalleryAdopt);
+
 
 //user upload image
-app.post('/api/user/upload',requireAuth, usergalleryController.upload.array('images', 5), usergalleryController.userHandleupload);
+app.post('/api/user/upload',requireAuth, usergalleryController.upload.array('images', 4), usergalleryController.userHandleupload);
 app.get('/api/user/gallery', usergalleryController.usergetGallery);
 app.delete('/api/user/gallery/:id',requireAuth, usergalleryController.userdeleteImage);
+//adoption request (admin side)
+app.put('/api/adoption/request/approve/:id', usergalleryController.approveRequest);
+app.put('/api/adoption/request/decline/:id', usergalleryController.declineRequest);
+app.get('/api/get/adoption/request', usergalleryController.getadoptRequest)
+//adoption request (user side)
+app.post('/api/adoption/request',requireAuth ,usergalleryController.adoptRequest)
+app.get('/api/get/adoption/request/:id',requireAuth , usergalleryController.getAdoptionRequestById)
 
-//volunteer user
-app.post('/api/volunteer-forms',requireAuth, volunteerController.volunteersubmitForm);
 
-//admin approve and decline to volunteer form
-app.get('/api/volunteer-forms-get', volunteerController.getVolunteerForms)
-app.put('/api/volunteer-approve/:id', volunteerController.adminApproveForm);
-app.delete('/api/volunteer-decline/:id', volunteerController.adminDeclineForm);
-
-//contact us user
-app.post('/api/contact-us',requireAuth ,handleFormSubmission.handleFormSubmission);
-app.get('/api/contact-us-submissions/:id', handleFormSubmission.getFormSubmissionById);
-//admin contact us
-app.get('/api/contact-us-submissions',requireAuth, handleFormSubmission.getAllFormSubmissions);
-app.put('/api/contact-us-approve/:id',requireAuth, handleFormSubmission.adminApproveAppointment);
-app.delete('/api/contact-us-decline/:id',requireAuth, handleFormSubmission.adminDeclineAppointment);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {

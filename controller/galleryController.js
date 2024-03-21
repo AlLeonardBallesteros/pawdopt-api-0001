@@ -55,7 +55,7 @@ const editImage = async (req, res) => {
     const updatedImage = await Gallery.findByIdAndUpdate(id, updatedFields, { new: true });
     res.json(updatedImage);
   } catch (error) {
-    console.error('Error updating image:', error);
+    console.error('Error updating image:', error); 
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };

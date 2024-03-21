@@ -1,18 +1,30 @@
 const mongoose = require('mongoose');
 
-const userGallerySchema = new mongoose.Schema({
-  imageUrl: String,
+const GalleryUserSchema = new mongoose.Schema({
   caption: String,
+  imageUrl: String,
   breed: String,
   gender: String,
-  age: String,
-  medhistory: String,
+  age: Number,
+  species: String,
+  others: String,
+  medhistory: [String],
   user_id: {
-    type: String,
-    required: true
-  }
-}, { timestamps: true })
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  approved: {
+    type: Boolean,
+    default: false 
+  },
+  name: String,
+  address: String,
+  contactinfo: String,
+  message: String,
+  status: { type: String, default: 'pending' },
+  
+}, { timestamps: true });
 
-const UserGallery = mongoose.model('UserGallery', userGallerySchema);
+const UserGallery = mongoose.model('UserGallery', GalleryUserSchema);
 
 module.exports = UserGallery;
